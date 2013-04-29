@@ -1,3 +1,5 @@
+import math
+
 __author__ = 'tjohnson'
 import numpy as np
 import random
@@ -10,7 +12,7 @@ class GenuineMultivariateHawkesProcess:
         self.decayFunctions=decayFunctions #w_j(t) in Liniger thesis
         self.markDistributions=markDistributions
 
-    def getLambda(self,componentIdx,timeComponentMarkTriplets,t):
+    def getLambda(self,componentIdx,timeComponentMarkTriplets,t,includeT=False):
         """Returns lambda hat as defined in algorithm 1.28 at bottom of Liniger p. 41"""
         lambdaHat=self.immigrationIntensities[componentIdx]
 
@@ -20,7 +22,9 @@ class GenuineMultivariateHawkesProcess:
 
         for s,k,x in timeComponentMarkTriplets:
             timeSinceEvent=t-s
-            if(timeSinceEvent>quantile):
+            if(timeSinceEvent>quantile or timeSinceEvent<0):
+                continue
+            if not includeT and timeSinceEvent==0:
                 continue
 
             branchingFactor=self.branchingMatrix[j,k]
@@ -35,7 +39,7 @@ class GenuineMultivariateHawkesProcess:
         """Linniger thesis bottom p. 30"""
 
         tau=previousTime
-        lambd=self.getLambda(componentIdx,timeComponentMarkTriplets,previousTime)
+        lambd=self.getLambda(componentIdx,timeComponentMarkTriplets,previousTime,includeT=True)
         while True:
 
             E=random.expovariate(1.0)
@@ -47,14 +51,24 @@ class GenuineMultivariateHawkesProcess:
             if u<=lambdaNew:
                 return tau
 
-    def getIntensitySequence(self,componentIdx,timeComponentMarkTriplets):
+    def getLogLikelihood(self,timeComponentMarkTriplets):
         """
-        Linniger thesis, Algorithm 1.28, bottom p.41
+        Liniger thesis, Algorithm 1.27, p. 41
         """
-        j=componentIdx
-        #TODO: YOU ARE HERE
 
+        lambdaTermSum=0
+        markDensityTermSum=0
 
+        for t,d,x in timeComponentMarkTriplets:
+            lambdaTermSum+=math.log(self.getLambda(d,timeComponentMarkTriplets,t,includeT=False))
+            markDensityTermSum+=math.log(self.markDistributions[d].getDensityFunction(x))
+
+        compensatorTermSum=0
+        for j in range(0,self.numComponents):
+            compensatorTermSum+=self.getCompensator(j,timeComponentMarkTriplets)
+
+        print "lambdaTermSum: %s markDensityTermSum: %s compensatorTermSum: %s" % (lambdaTermSum,markDensityTermSum,compensatorTermSum)
+        return lambdaTermSum+markDensityTermSum-compensatorTermSum
 
     def getCompensator(self,componentIdx,timeComponentMarkTriplets):
         """

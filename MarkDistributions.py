@@ -27,7 +27,7 @@ class ParetoMarkDistribution:
         return retval
 
     def getDensityFunction(self,x):
-        """Liniger f_u,p(x)"""
+        """Liniger f_u,p(x) (p. 21)"""
         numerator=self.rho*self.mu**self.rho
         denominator=(x+self.mu)**(self.rho+1)
         return numerator/denominator
@@ -40,6 +40,6 @@ class ParetoMarkDistribution:
         """Impact function for pareto distribution. Liniger g_k(x)"""
         term1Numerator=(self.rho-1.0)*(self.rho-2.0)
         term1Denominator=self.alpha*(self.rho-1.0)*(self.rho-2.0)+self.beta*self.mu*(self.rho-2.0)+2.0*self.gamma*self.mu*self.mu
-        term2=self.alpha*self.beta*x+self.gamma*x*x
+        term2=self.alpha+self.beta*x+self.gamma*x*x
 
         return term1Numerator/term1Denominator*term2
