@@ -2,7 +2,7 @@ __author__ = 'tjohnson'
 import numpy as np
 import random
 
-class HawkesProcess:
+class GenuineMultivariateHawkesProcess:
     def __init__(self,immigrationIntensities,branchingMatrix,decayFunctions,markDistributions):
         self.numComponents=len(immigrationIntensities)
         self.immigrationIntensities=immigrationIntensities #nu_j in Liniger thesis
@@ -47,7 +47,36 @@ class HawkesProcess:
             if u<=lambdaNew:
                 return tau
 
+    def getIntensitySequence(self,componentIdx,timeComponentMarkTriplets):
+        """
+        Linniger thesis, Algorithm 1.28, bottom p.41
+        """
+        j=componentIdx
+        #TODO: YOU ARE HERE
 
+
+
+    def getCompensator(self,componentIdx,timeComponentMarkTriplets):
+        """
+        Big Lambda from Liniger Thesis
+        Algorithm from Liniger thesis p. 44
+        """
+        #TODO: This can be made a little faster using the approximation at the bottom of Liniger p. 44.
+        #TODO: Just don't calculate wBar if lastTime-s > q_j
+        firstTime=timeComponentMarkTriplets[0][0]
+        lastTime=timeComponentMarkTriplets[-1][0]
+        firstTerm=self.immigrationIntensities[componentIdx]*(lastTime-firstTime)
+
+        j=componentIdx
+        secondTerm=0
+        for s,k,x in timeComponentMarkTriplets:
+            branchingFactor=self.branchingMatrix[j,k]
+            wBarValue=self.decayFunctions[j].getWBar(lastTime-s)
+            gValue=self.markDistributions[k].getImpactFunction(x)
+            secondTerm+=branchingFactor*wBarValue*gValue
+
+        retval=firstTerm+secondTerm
+        return retval
 
     def simulate(self,numTimesteps):
         timeComponentMarkTriplets=[]
