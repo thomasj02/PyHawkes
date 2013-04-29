@@ -3,6 +3,7 @@ __author__ = 'tjohnson'
 import DecayFunctions
 import MarkDistributions
 import GenuineMultivariateHawkesProcess
+import ImmigrationDescendantParameters
 import numpy as np
 
 
@@ -17,13 +18,17 @@ phi1=0.47
 phi2=1.1
 psi1=0.22
 psi2=0.0
-decayFunction=DecayFunctions.ExponentialDecayFunction(alpha)
-markDistribution1=MarkDistributions.ParetoMarkDistribution(mu1,rho1,phi1,psi1,0.0)
-markDistribution2=MarkDistributions.ParetoMarkDistribution(mu2,rho2,phi2,psi2,0.0)
+
+immigrationDescendantParameters=\
+    ImmigrationDescendantParameters.ImmigrationDescendantParameters(2,[0.021,0.029,0.61,0.16,0.6,0.06])
+print immigrationDescendantParameters.nu
+print immigrationDescendantParameters.q
+decayFunction=DecayFunctions.ExponentialDecayFunction([alpha])
+markDistribution1=MarkDistributions.ParetoMarkDistribution([mu1,rho1,phi1,psi1,0.0])
+markDistribution2=MarkDistributions.ParetoMarkDistribution([mu2,rho2,phi2,psi2,0.0])
 
 hawkesProcess=GenuineMultivariateHawkesProcess.GenuineMultivariateHawkesProcess(
-    nu,
-    q,
+    immigrationDescendantParameters,
     [decayFunction,decayFunction],
     [markDistribution1,markDistribution2])
 
@@ -33,10 +38,9 @@ goodLogLikelihood=hawkesProcess.getLogLikelihood(secondHalfTimeComponentMarkTrip
 print goodLogLikelihood
 
 
-badDecayFunction=DecayFunctions.ExponentialDecayFunction(alpha)
+badDecayFunction=DecayFunctions.ExponentialDecayFunction([alpha])
 badLogLikelihood=GenuineMultivariateHawkesProcess.GenuineMultivariateHawkesProcess(
-    np.array([0.021,0.029]),
-    np.matrix("[0.61 0.16;0.60 0.06]"),
+    immigrationDescendantParameters,
     [badDecayFunction,badDecayFunction],
     [markDistribution1,markDistribution2]).getLogLikelihood(secondHalfTimeComponentMarkTriples)
 print badLogLikelihood

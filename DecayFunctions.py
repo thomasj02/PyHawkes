@@ -6,9 +6,20 @@ class ExponentialDecayFunction:
     Exponential decay function from Liniger thesis p. 32
     """
 
-    def __init__(self,alpha):
-        self.alpha=alpha
+    def __init__(self,params):
+        self.setParams(params)
         self.epsilon=1e-5 #For Q function
+
+    @staticmethod
+    def getNumParameters():
+        return 1
+
+    def setParams(self,params):
+        """
+        Set parameters with an iterable to support log-likelihood calculation
+        This will set alpha=params[0]
+        """
+        self.alpha=params[0]
 
     def getW(self,t):
         """

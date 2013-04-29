@@ -1,20 +1,18 @@
 import math
 
 __author__ = 'tjohnson'
-import numpy as np
 import random
 
 class GenuineMultivariateHawkesProcess:
-    def __init__(self,immigrationIntensities,branchingMatrix,decayFunctions,markDistributions):
-        self.numComponents=len(immigrationIntensities)
-        self.immigrationIntensities=immigrationIntensities #nu_j in Liniger thesis
-        self.branchingMatrix=branchingMatrix #script v_jk(x) in Liniger thesis
+    def __init__(self,immigrationDescendantParameters,decayFunctions,markDistributions):
+        self.numComponents=immigrationDescendantParameters.numComponents
+        self.immigrationDescendantParameters=immigrationDescendantParameters
         self.decayFunctions=decayFunctions #w_j(t) in Liniger thesis
         self.markDistributions=markDistributions
 
     def getLambda(self,componentIdx,timeComponentMarkTriplets,t,includeT=False):
         """Returns lambda hat as defined in algorithm 1.28 at bottom of Liniger p. 41"""
-        lambdaHat=self.immigrationIntensities[componentIdx]
+        lambdaHat=self.immigrationDescendantParameters.nu[componentIdx]
 
         j=componentIdx
         decayFunction=self.decayFunctions[j]
@@ -27,7 +25,7 @@ class GenuineMultivariateHawkesProcess:
             if not includeT and timeSinceEvent==0:
                 continue
 
-            branchingFactor=self.branchingMatrix[j,k]
+            branchingFactor=self.immigrationDescendantParameters.q[j,k]
             decayFunctionValue=decayFunction.getW(t-s)
             impactFunctionValue=self.markDistributions[k].getImpactFunction(x)
 
@@ -36,7 +34,7 @@ class GenuineMultivariateHawkesProcess:
         return lambdaHat
 
     def __simulationInnerLoop(self,componentIdx,previousTime,timeComponentMarkTriplets):
-        """Linniger thesis bottom p. 30"""
+        """Liniger thesis bottom p. 30"""
 
         tau=previousTime
         lambd=self.getLambda(componentIdx,timeComponentMarkTriplets,previousTime,includeT=True)
@@ -67,7 +65,6 @@ class GenuineMultivariateHawkesProcess:
         for j in range(0,self.numComponents):
             compensatorTermSum+=self.getCompensator(j,timeComponentMarkTriplets)
 
-        print "lambdaTermSum: %s markDensityTermSum: %s compensatorTermSum: %s" % (lambdaTermSum,markDensityTermSum,compensatorTermSum)
         return lambdaTermSum+markDensityTermSum-compensatorTermSum
 
     def getCompensator(self,componentIdx,timeComponentMarkTriplets):
@@ -79,12 +76,12 @@ class GenuineMultivariateHawkesProcess:
         #TODO: Just don't calculate wBar if lastTime-s > q_j
         firstTime=timeComponentMarkTriplets[0][0]
         lastTime=timeComponentMarkTriplets[-1][0]
-        firstTerm=self.immigrationIntensities[componentIdx]*(lastTime-firstTime)
+        firstTerm=self.immigrationDescendantParameters.nu[componentIdx]*(lastTime-firstTime)
 
         j=componentIdx
         secondTerm=0
         for s,k,x in timeComponentMarkTriplets:
-            branchingFactor=self.branchingMatrix[j,k]
+            branchingFactor=self.immigrationDescendantParameters.q[j,k]
             wBarValue=self.decayFunctions[j].getWBar(lastTime-s)
             gValue=self.markDistributions[k].getImpactFunction(x)
             secondTerm+=branchingFactor*wBarValue*gValue

@@ -2,18 +2,35 @@ __author__ = 'tjohnson'
 import random
 
 class ParetoMarkDistribution:
-    def __init__(self,mu,rho,alpha,beta,gamma):
+    def __init__(self,params):
         """
         Pareto-distributed impact function
         Must have rho>2
         Seems to be different than standard pareto distribution??
         From Liniger thesis p. 37
         """
-        self.mu=mu
-        self.rho=rho
-        self.alpha=alpha
-        self.beta=beta
-        self.gamma=gamma
+        self.setParams(params)
+
+    @staticmethod
+    def getNumParameters():
+        return 5
+
+    def setParams(self, params):
+        """
+        Set parameters with an iterable to support log-likelihood calculation
+        This will set:
+         mu=params[0]
+         rho=params[1]
+         alpha=params[2]
+         beta=params[3]
+         gamma=params[4]
+        """
+
+        self.mu = params[0]
+        self.rho = params[1]
+        self.alpha=params[2]
+        self.beta=params[3]
+        self.gamma=params[4]
 
     def getRandomValue(self):
         randomVal=random.random()
