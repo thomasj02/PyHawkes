@@ -1,5 +1,6 @@
 __author__ = 'tjohnson'
 import numpy as np
+
 class ImmigrationDescendantParameters:
     def __init__(self,numComponents,params):
         self.numComponents=numComponents
@@ -26,3 +27,11 @@ class ImmigrationDescendantParameters:
 
         for qIdx,paramVal in zip(range(0,self.numComponents*self.numComponents),params[self.numComponents:]):
             self.q.put(qIdx,paramVal)
+
+    def getSpectralRadius(self):
+        eigenVals,eigenVects=np.linalg.eig(self.q)
+        maxVal=0
+        for eigenVal in eigenVals:
+            maxVal=max(maxVal,abs(eigenVal))
+
+        return maxVal

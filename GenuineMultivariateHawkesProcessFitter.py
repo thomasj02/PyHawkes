@@ -10,21 +10,50 @@ class GenuineMultivariateHawkesProcessFitter:
         parameterBounds=[]
 
         numComponents=hawkesProcess.numComponents
-        totalNumParams+=ImmigrationDescendantParameters.ImmigrationDescendantParameters.getNumParameters(numComponents)
+        self.immigrationDescendantNumParams=ImmigrationDescendantParameters.ImmigrationDescendantParameters.getNumParameters(numComponents)
+        totalNumParams+=self.immigrationDescendantNumParams
         parameterBounds.extend(ImmigrationDescendantParameters.ImmigrationDescendantParameters.getParameterBounds(numComponents))
 
-        decayFunctions=hawkesProcess.decayFunctions
-        for decayFunction in decayFunctions:
-            totalNumParams+=decayFunction.getNumParameters()
+        self.decayFunctionsNumParams=[]
+        for decayFunction in self.__getDecayFunctions():
+            thisDecayFunctionNumParams=decayFunction.getNumParameters()
+            self.decayFunctionsNumParams.append(thisDecayFunctionNumParams)
+            totalNumParams+=thisDecayFunctionNumParams
             parameterBounds.extend(decayFunction.getParameterBounds())
 
-        markDistributions=hawkesProcess.markDistributions
-        for markDistribution in markDistributions:
-            totalNumParams+=markDistribution.getNumParameters()
+        self.markDistributionsNumParams=[]
+        for markDistribution in self.__getMarkDistributions():
+            thisMarkDistributionNumParams=markDistribution.getNumParameters()
+            self.markDistributionsNumParams.append(thisMarkDistributionNumParams)
+            totalNumParams+=thisMarkDistributionNumParams
             parameterBounds.extend(markDistribution.getParameterBounds())
 
         self.numParams=totalNumParams
         self.parameterBounds=parameterBounds
+
+    def __getMarkDistributions(self):
+        retval=[]
+
+        lastMarkDistribution=None
+        for markDistribution in self.hawkesProcess.markDistributions:
+            if markDistribution is lastMarkDistribution:
+                continue
+            retval.append(markDistribution)
+            lastMarkDistribution=markDistribution
+
+        return retval
+
+    def __getDecayFunctions(self):
+        retval=[]
+
+        lastDecayFunction=None
+        for decayFunction in self.hawkesProcess.decayFunctions:
+            if decayFunction is lastDecayFunction:
+                continue
+            retval.append(decayFunction)
+            lastDecayFunction=decayFunction
+
+        return retval
 
     def getInitialRandomVector(self):
         vector=[]
@@ -35,6 +64,29 @@ class GenuineMultivariateHawkesProcessFitter:
             vector.append(randomValue)
 
         return vector
+
+    def setParameterValues(self,params):
+        parameterStartIndex=0
+        self.hawkesProcess.immigrationDescendantParameters.setParameters(params[parameterStartIndex:self.immigrationDescendantNumParams])
+        parameterStartIndex+=self.immigrationDescendantNumParams
+
+        for decayFunction,decayFunctionNumParams in zip(self.__getDecayFunctions(),self.decayFunctionsNumParams):
+            decayFunctionParams=params[parameterStartIndex:parameterStartIndex+decayFunctionNumParams]
+            parameterStartIndex+=decayFunctionNumParams
+
+            decayFunction.setParams(decayFunctionParams)
+
+
+        for markDistribution,markDistributionNumParams in zip(self.__getMarkDistributions(),self.markDistributionsNumParams):
+            markDistributionParams = params[parameterStartIndex:parameterStartIndex + markDistributionNumParams]
+            parameterStartIndex+=markDistributionNumParams
+
+            markDistribution.setParams(markDistributionParams)
+
+
+    def maximizeLikelihood(self,timeComponentMarkTriples,initialGuess):
+        #likelihoodFunction=lambda x: self.hawkesProcess.
+        pass
 
 
 if __name__=="__main__":
