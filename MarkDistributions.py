@@ -15,6 +15,12 @@ class ParetoMarkDistribution:
     def getNumParameters():
         return 5
 
+    @staticmethod
+    def getParameterBounds():
+        #This specifies that alpha>0, but strictly speaking only one of alpha, beta, gamma have to be greater than zero.
+        #See Liniger thesis p. 34
+        return [[0,None],[2,None],[0,None],[None,None],[None,None]]
+
     def setParams(self, params):
         """
         Set parameters with an iterable to support log-likelihood calculation
@@ -60,3 +66,35 @@ class ParetoMarkDistribution:
         term2=self.alpha+self.beta*x+self.gamma*x*x
 
         return term1Numerator/term1Denominator*term2
+
+
+class VoidMarkDistribution:
+    def __init__(self,params):
+        """
+        Void impact function
+        From Liniger thesis p. 21
+        """
+        self.setParams(params)
+
+    @staticmethod
+    def getNumParameters():
+        return 0
+
+    @staticmethod
+    def getParameterBounds():
+        return []
+
+    def setParams(self, params):
+        pass
+
+    def getRandomValue(self):
+        return 1.0
+
+    def getDensityFunction(self,x):
+        return 1.0
+
+    def getCumulativeDistributionFunction(self,x):
+        return 1.0
+
+    def getImpactFunction(self,x):
+        return 1.0

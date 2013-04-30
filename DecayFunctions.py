@@ -14,6 +14,10 @@ class ExponentialDecayFunction:
     def getNumParameters():
         return 1
 
+    @staticmethod
+    def getParameterBounds():
+        return [[0,None]]
+
     def setParams(self,params):
         """
         Set parameters with an iterable to support log-likelihood calculation

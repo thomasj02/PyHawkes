@@ -13,6 +13,13 @@ class ImmigrationDescendantParameters:
         #Square matrix plus vector
         return numComponents*numComponents+numComponents
 
+    @staticmethod
+    def getParameterBounds(numComponents):
+        #All parameters are >= 0
+        numParameters=ImmigrationDescendantParameters.getNumParameters(numComponents)
+        bounds=[[0,None]]*numParameters
+        return bounds
+
     def setParameters(self,params):
         for nuIdx,paramVal in zip(range(0,self.numComponents),params[0:self.numComponents]):
             self.nu[nuIdx]=paramVal
