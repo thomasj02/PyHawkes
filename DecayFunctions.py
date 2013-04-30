@@ -16,7 +16,7 @@ class ExponentialDecayFunction:
 
     @staticmethod
     def getParameterBounds():
-        return [[0,None]]
+        return [[1e-5,None]]
 
     def setParams(self,params):
         """

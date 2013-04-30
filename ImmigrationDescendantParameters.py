@@ -18,7 +18,7 @@ class ImmigrationDescendantParameters:
     def getParameterBounds(numComponents):
         #All parameters are >= 0
         numParameters=ImmigrationDescendantParameters.getNumParameters(numComponents)
-        bounds=[[0,None]]*numParameters
+        bounds=[[1e-5,None]]*numParameters
         return bounds
 
     def setParameters(self,params):

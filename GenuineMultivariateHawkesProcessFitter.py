@@ -1,6 +1,7 @@
 __author__ = 'tjohnson'
 import ImmigrationDescendantParameters
 import random
+import scipy.optimize
 
 class GenuineMultivariateHawkesProcessFitter:
     def __init__(self,hawkesProcess):
@@ -83,10 +84,21 @@ class GenuineMultivariateHawkesProcessFitter:
 
             markDistribution.setParams(markDistributionParams)
 
+    def __getNegativeLogLikelihoodWithParameters(self,parameters,timeComponentMarkTriples):
+        print "Getting log likelihood with parameters",parameters
+        self.setParameterValues(parameters)
+        negativeLogLikelihood=-self.hawkesProcess.getLogLikelihood(timeComponentMarkTriples)
+        print "Got",negativeLogLikelihood
+        return negativeLogLikelihood
 
     def maximizeLikelihood(self,timeComponentMarkTriples,initialGuess):
-        #likelihoodFunction=lambda x: self.hawkesProcess.
-        pass
+        self.setParameterValues(initialGuess)
+        negativeLogLikelihoodFunction=lambda x: self.__getNegativeLogLikelihoodWithParameters(x,timeComponentMarkTriples)
+        print "Initial Likelihood: %s" % negativeLogLikelihoodFunction(initialGuess)
+
+        bestParams=scipy.optimize.fmin_l_bfgs_b(negativeLogLikelihoodFunction,x0=initialGuess,approx_grad=True,bounds=self.parameterBounds,iprint=1)
+        print "BestParams:",bestParams
+        print "Best Log likelihood:",negativeLogLikelihoodFunction(bestParams)
 
 
 if __name__=="__main__":
